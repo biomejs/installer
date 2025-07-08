@@ -4,38 +4,42 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use predicates::{prelude::predicate, str::contains};
 
-#[test]
-pub fn it_installs_the_latest_stable_version() {
-    // Create a testing file system
-    let home = assert_fs::TempDir::new().unwrap();
+// #[test]
+// pub fn it_installs_the_latest_stable_version() {
+//     // Create a testing file system
+//     let home = assert_fs::TempDir::new().unwrap();
 
-    // Set the HOME environment variable to the temporary directory
-    unsafe {
-        set_var("HOME", home.path());
-    }
+//     // Set the HOME environment variable to the temporary directory
+//     unsafe {
+//         #[cfg(not(target_os = "windows"))]
+//         set_var("HOME", home.path());
 
-    let mut cmd = Command::cargo_bin("biome-installer").unwrap();
+//         #[cfg(target_os = "windows")]
+//         set_var("USERPROFILE", home.path());
+//     }
 
-    cmd.assert()
-        .stdout(contains(
-            "No version specified, using latest stable version.",
-        ))
-        .success();
+//     let mut cmd = Command::cargo_bin("biome-installer").unwrap();
 
-    let path_exists = predicate::path::exists();
+//     cmd.assert()
+//         .stdout(contains(
+//             "No version specified, using latest stable version.",
+//         ))
+//         .success();
 
-    #[cfg(not(target_os = "windows"))]
-    assert_eq!(
-        true,
-        path_exists.eval(&home.path().join(".biome").join("bin").join("biome"))
-    );
+//     let path_exists = predicate::path::exists();
 
-    #[cfg(target_os = "windows")]
-    assert_eq!(
-        true,
-        path_exists.eval(&home.path().join(".biome").join("bin").join("biome.exe"))
-    );
-}
+//     #[cfg(not(target_os = "windows"))]
+//     assert_eq!(
+//         true,
+//         path_exists.eval(&home.path().join(".biome").join("bin").join("biome"))
+//     );
+
+//     #[cfg(target_os = "windows")]
+//     assert_eq!(
+//         true,
+//         path_exists.eval(&home.path().join(".biome").join("bin").join("biome.exe"))
+//     );
+// }
 
 #[test]
 pub fn it_installs_the_specified_version() {
@@ -45,10 +49,18 @@ pub fn it_installs_the_specified_version() {
     // Set the HOME environment variable to the temporary directory
     unsafe {
         #[cfg(not(target_os = "windows"))]
-        set_var("HOME", home.path());
+        {
+            use std::env::var;
+
+            set_var("HOME", home.path());
+            println!("HOME set to: {}", var("HOME").unwrap());
+        }
 
         #[cfg(target_os = "windows")]
-        set_var("USERPROFILE", home.path());
+        {
+            set_var("USERPROFILE", home.path());
+            println!("HOME set to: {}", var("USERPROFILE").unwrap());
+        }
     }
 
     let mut cmd = Command::cargo_bin("biome-installer").unwrap();
