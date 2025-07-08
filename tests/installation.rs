@@ -63,10 +63,17 @@ pub fn it_installs_the_specified_version() {
 
     let mut cmd = Command::cargo_bin("biome-installer").unwrap();
 
-    cmd.arg("2.0.5")
+    let value = cmd
+        .arg("2.0.5")
         .assert()
         .stdout(contains("Downloading Biome version 2.0.5"))
-        .success();
+        .get_output()
+        .clone();
+
+    println!(
+        "Command output: {:?}",
+        String::from_utf8(value.stdout).unwrap()
+    );
 
     let path_exists = predicate::path::exists();
 

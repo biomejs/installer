@@ -18,7 +18,7 @@ fn main() -> Result<()> {
         .join(".biome")
         .join("bin");
 
-    print!("Detected home directory: {}", default_install_dir.display());
+    println!("Detected home directory: {}", default_install_dir.display());
 
     let matches = command!()
         .arg(
