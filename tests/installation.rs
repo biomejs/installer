@@ -44,7 +44,11 @@ pub fn it_installs_the_specified_version() {
 
     // Set the HOME environment variable to the temporary directory
     unsafe {
+        #[cfg(not(target_os = "windows"))]
         set_var("HOME", home.path());
+
+        #[cfg(target_os = "windows")]
+        set_var("USERPROFILE", home.path());
     }
 
     let mut cmd = Command::cargo_bin("biome-installer").unwrap();
