@@ -7,6 +7,7 @@ rust-version = "1.88.0"
 [dependencies]
 anyhow = "1.0.98"
 clap = { version = "4.5.40", features = ["cargo", "derive", "string", "env"] }
+home = "0.5.11"
 homedir = "0.3.6"
 predicates = "3.1.3"
 reqwest = { version = "0.12.22", default-features = false, features = [

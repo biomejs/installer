@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use homedir::my_home;
+use home::home_dir;
 use std::{fs, os::unix::fs::PermissionsExt};
 
 use super::BiomeInstaller;
@@ -80,16 +80,13 @@ impl Shell {
 
     /// Returns the shell-specific configuration file for updating PATH
     pub fn config_file(&self) -> Option<PathBuf> {
-        let home_dir = my_home().ok()?;
-
-        if let Some(home_dir) = home_dir {
+        if let Some(home_dir) = home_dir() {
             return match self {
                 Shell::Bash => Some(home_dir.join(".bashrc")),
                 Shell::Zsh => Some(home_dir.join(".zshrc")),
                 Shell::Fish => Some(home_dir.join(".config/fish/config.fish")),
             };
         }
-
         None
     }
 

@@ -1,5 +1,3 @@
-use std::env::{set_var, var};
-
 use assert_cmd::Command;
 use predicates::prelude::*;
 use predicates::{prelude::predicate, str::contains};
@@ -77,19 +75,6 @@ pub fn it_installs_the_specified_version() {
 
     #[cfg(target_os = "windows")]
     {
-        println!("Checking for Windows executable...");
-        println!(
-            "Expected path: {}",
-            home.path()
-                .join(".biome")
-                .join("bin")
-                .join("biome.exe")
-                .display()
-        );
-        println!(
-            "Directory contents: {:?}",
-            home.path().join(".biome").read_dir()
-        );
         assert_eq!(
             true,
             path_exists.eval(&home.path().join(".biome").join("bin").join("biome.exe"))

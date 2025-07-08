@@ -2,7 +2,7 @@ use crate::installer::Installer;
 use anyhow::{Context, Result};
 use clap::{ArgAction, ValueHint, arg, command, value_parser};
 use downloader::Downloader;
-use homedir::my_home;
+use home::home_dir;
 use semver::Version;
 use std::path::PathBuf;
 use utils::get_latest_stable_version;
@@ -13,12 +13,6 @@ mod utils;
 
 fn main() -> Result<()> {
     // Compute the default installation directory
-    let default_install_dir = my_home()?
-        .context("Failed to get home directory")?
-        .join(".biome")
-        .join("bin");
-
-    println!("Detected home directory: {}", default_install_dir.display());
 
     let matches = command!()
         .arg(
@@ -30,7 +24,6 @@ fn main() -> Result<()> {
         .arg(
             arg!(-d --"install-dir" <DIR> "The directory in which to install Biome")
                 .env("BIOME_INSTALL_DIR")
-                .default_value(default_install_dir.into_os_string())
                 .value_hint(ValueHint::DirPath)
                 .value_parser(value_parser!(PathBuf)),
         )
@@ -55,10 +48,13 @@ fn main() -> Result<()> {
     let temp_file = Downloader::download(&version)
         .context("Could not download the specified version of Biome")?;
 
-    let install_dir = matches
-        .get_one::<PathBuf>("install-dir")
-        .unwrap()
-        .to_path_buf();
+    let install_dir = if let Some(dir) = matches.get_one::<PathBuf>("install-dir") {
+        dir.clone()
+    } else {
+        home_dir()
+            .map(|p| p.join(".biome").join("bin"))
+            .context("Could not determine home directory for default install dir")?
+    };
 
     let update_path = !matches.get_flag("no-update-path");
 
