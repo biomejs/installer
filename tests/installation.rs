@@ -46,25 +46,17 @@ pub fn it_installs_the_specified_version() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
 
-    // Set the HOME environment variable to the temporary directory
-    unsafe {
-        #[cfg(not(target_os = "windows"))]
-        {
-            set_var("HOME", home.path());
-            println!("HOME set to: {}", var("HOME").unwrap());
-        }
-
-        #[cfg(target_os = "windows")]
-        {
-            set_var("USERPROFILE", home.path());
-            println!("HOME set to: {}", var("USERPROFILE").unwrap());
-        }
-    }
-
     let mut cmd = Command::cargo_bin("biome-installer").unwrap();
+
+    let home_dir_name = if cfg!(target_os = "windows") {
+        "USERPROFILE"
+    } else {
+        "HOME"
+    };
 
     let value = cmd
         .arg("2.0.5")
+        .env(home_dir_name, home.path())
         .assert()
         .stdout(contains("Downloading Biome version 2.0.5"))
         .get_output()
