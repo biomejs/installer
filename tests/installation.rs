@@ -1,4 +1,4 @@
-use std::env::set_var;
+use std::env::{set_var, var};
 
 use assert_cmd::Command;
 use predicates::prelude::*;
@@ -50,8 +50,6 @@ pub fn it_installs_the_specified_version() {
     unsafe {
         #[cfg(not(target_os = "windows"))]
         {
-            use std::env::var;
-
             set_var("HOME", home.path());
             println!("HOME set to: {}", var("HOME").unwrap());
         }
