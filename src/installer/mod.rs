@@ -60,6 +60,8 @@ trait BiomeInstaller {
 
         if update_path {
             self.update_path().context("Failed to update PATH")?;
+        } else {
+            println!("Skippping PATH update because `--no-update-path` was specified.");
         }
 
         Ok((destination_path, install_dir.clone()))

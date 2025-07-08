@@ -1,64 +1,77 @@
 #!/bin/env bash
-# Biome Installer Bootstrap Script for macOS and Linux
-# https://github.com/biomejs/installer
+##############################################################################
+#                                                                            #
+#   ____  _                           ___           _        _ _             #
+#  | __ )(_) ___  _ __ ___   ___     |_ _|_ __  ___| |_ __ _| | | ___ _ __   #
+#  |  _ \| |/ _ \| '_ ` _ \ / _ \     | || '_ \/ __| __/ _` | | |/ _ \ '__|  #
+#  | |_) | | (_) | | | | | |  __/     | || | | \__ \ || (_| | | |  __/ |     #
+#  |____/|_|\___/|_| |_| |_|\___|    |___|_| |_|___/\__\__,_|_|_|\___|_|     #
+#                                                                            #
+#  Biome Installer Bootstrapper                                              #
+#                                                                            #
+#  This script downloads and runs the Biome installer for the current os     #
+#  and architecture. It is designed to be run on Linux and macOS systems.    #
+#  It requires curl to be installed.                                         #
+#                                                                            #
+#  This script is part of the Biome project, and is dual-licensed under the  #
+#  Apache License 2.0 OR the MIT License, at your discretion.                #
+#                                                                            #
+#  Copyright (c) 2025 Nicolas Hedger                                         #
+#                                                                            #
+##############################################################################
 
 set -euo pipefail
 
+# Removes the temporary file specified by $temp_file if it exists.
+function cleanup() {
+  [[ -n "${temp_file:-}" && -f "$temp_file" ]] && rm -f "$temp_file"
+}
+
+# Trap to ensure cleanup is called on script exit
+trap cleanup EXIT
+
+# Determines the operating system
 function get_os() {
   case "$(uname -s)" in
     Linux*)   echo "linux" ;;
     Darwin*)  echo "darwin" ;;
-    CYGWIN*)  echo "windows" ;;
-    *) echo "Unsupported platform"; exit 1;;
+    *) echo "Unsupported platform: $(uname -s)" >&2; exit 1;;
   esac
 }
 
+# Determines the architecture
 function get_arch() {
   case "$(uname -m)" in
-    x86_64) echo "x86_64" ;;
+    amd64 | x86_64) echo "x86_64" ;;
     aarch64 | arm64) echo "aarch64" ;;
-    *) echo "Unsupported architecture"; exit 1;;
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1;;
   esac
 }
 
-function download_installer() {
-    # Check if curl is installed
+# Downloads the installer and runs it
+function main() {
     if ! command -v curl &> /dev/null; then
-        echo "curl is not installed. Please install curl and try again."
+        echo "Error: curl is required but not installed" >&2
         exit 1
     fi
 
-    local os
-    local arch
-    local extension=""
+    local os arch url
 
     os=$(get_os)
     arch=$(get_arch)
-    extension=""
+    temp_file=$(mktemp)
+    url="https://github.com/biomejs/installer/releases/latest/download/biome-installer-${os}-${arch}"
 
-    if [[ "$os" == "windows" ]]; then
-        extension=".exe"
-    fi
-
-    local url="https://github.com/biomejs/installer/releases/latest/download/biome-installer-${os}-${arch}${extension}"
-
-    # Download the installer to a temporary file
-    local temp_file
-    temp_file=$(mktemp /tmp/biome-installer.XXXXXX)
+    echo "Downloading and running Biome installer for ${os} (${arch})..."
     
-    if ! curl -fsSL "$url" -o "$temp_file"; then
-        echo "Failed to download the installer."
+    if ! curl -fsSL --retry 3 "$url" -o "$temp_file"; then
+        echo "Error: Failed to download installer" >&2
         exit 1
     fi
 
-    # Make the downloaded file executable
     chmod +x "$temp_file"
 
     "$temp_file" "$@"
-}
-
-function main() {
-    download_installer "$@"
 }
 
 main "$@"

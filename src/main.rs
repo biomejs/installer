@@ -1,6 +1,7 @@
 use crate::installer::Installer;
 use anyhow::{Context, Result};
 use clap::{ArgAction, ValueHint, arg, command, value_parser};
+use colored::Colorize;
 use downloader::Downloader;
 use home::home_dir;
 use semver::Version;
@@ -58,9 +59,17 @@ fn main() -> Result<()> {
 
     let update_path = !matches.get_flag("no-update-path");
 
-    let (bin, _) = Installer::install(temp_file, install_dir, update_path)?;
+    let (bin, _) = Installer::install(temp_file, install_dir.clone(), update_path)?;
 
-    println!("Biome installed successfully at: {}", bin.display());
+    println!(
+        "{}",
+        format!("Biome installed successfully at: {}", bin.display()).green()
+    );
+
+    println!(
+        "{}",
+        format!("You may need to restart your terminal or source your shell configuration ({}) to use biome", install_dir.display()).yellow()
+    );
 
     Ok(())
 }

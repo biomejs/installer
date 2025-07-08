@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use colored::Colorize;
 use home::home_dir;
 use std::{fs, os::unix::fs::PermissionsExt};
 
@@ -29,8 +30,10 @@ impl BiomeInstaller for UnixInstaller {
                     Ok(())
                 } else {
                     println!(
-                        "The installation directory {} is already in your PATH.",
-                        self.install_dir.display()
+                        "{} {} {}",
+                        "Skipping PATH update because the installation directory".yellow(),
+                        format!("{}", self.install_dir.display()).bold().yellow(),
+                        "is already in your PATH.".yellow()
                     );
                     Ok(())
                 }

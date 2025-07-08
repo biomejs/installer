@@ -1,6 +1,7 @@
 use std::{io::Write, path::PathBuf};
 
 use anyhow::{Context, Ok, Result};
+use colored::Colorize;
 use semver::Version;
 use tempfile::NamedTempFile;
 
@@ -29,7 +30,10 @@ impl Downloader {
             .tempfile()
             .context("Could not create temporary file")?;
 
-        println!("Downloading Biome version {version}");
+        println!(
+            "{}",
+            format!("Downloading Biome version {}", version).blue()
+        );
 
         // Download the asset into the temporary file
         let temp_file_path =
