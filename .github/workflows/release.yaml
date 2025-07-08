@@ -75,7 +75,7 @@ jobs:
       - name: Rename the binary to include the platform
         run: |
           mkdir -p dist
-          mv target/${{ matrix.target }}/release/biome-installer dist/biome-installer-${{ matrix.suffix }}"
+          mv "target/${{ matrix.target }}/release/biome-installer" "dist/biome-installer-${{ matrix.suffix }}"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
