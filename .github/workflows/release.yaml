@@ -73,9 +73,15 @@ jobs:
       - name: Build
         run: cross build --target ${{ matrix.target }} --release
       - name: Rename the binary to include the platform
+        if: ${{ matrix.target != 'x86_64-pc-windows-msvc' }}
         run: |
           mkdir -p dist
           mv "target/${{ matrix.target }}/release/biome-installer" "dist/biome-installer-${{ matrix.suffix }}"
+      - name: Rename the binary for Windows
+        if: ${{ matrix.target == 'x86_64-pc-windows-msvc' }}
+        run: |
+          mkdir -p dist
+          mv "target/${{ matrix.target }}/release/biome-installer.exe" "dist/biome-installer-${{ matrix.suffix }}"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
