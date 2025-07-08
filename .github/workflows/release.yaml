@@ -73,9 +73,9 @@ jobs:
       - name: Build
         run: cross build --target ${{ matrix.target }} --release
       - name: Rename the binary to include the platform
-        run:
-          "mv target/${{ matrix.target }}/release/installer
-          dist/biome-installer-${{ matrix.suffix }}"
+        run: |
+          mkdir -p dist
+          mv target/${{ matrix.target }}/release/biome-installer dist/biome-installer-${{ matrix.suffix }}"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
