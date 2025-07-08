@@ -92,17 +92,18 @@ impl Shell {
 
     /// Determines if the installation directory is already in the PATH
     pub fn is_already_in_path(&self, install_dir: &PathBuf) -> bool {
-        let path = env::var_os("PATH");
-
-        if let Some(path) = path {
+        if let Some(path) = env::var_os("PATH") {
             let install_dir = install_dir
                 .canonicalize()
                 .unwrap_or_else(|_| install_dir.clone());
 
-            return path
-                .to_string_lossy()
-                .split(":")
-                .any(|segment| PathBuf::from(segment) == install_dir);
+            return path.to_string_lossy().split(':').any(|s| {
+                let segment = PathBuf::from(s);
+                match segment.canonicalize() {
+                    Ok(segment) => segment == install_dir,
+                    Err(_) => false,
+                }
+            });
         }
 
         return false;
