@@ -71,6 +71,7 @@ pub fn it_installs_the_specified_version() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_prepends_the_installation_directory_to_the_path_with_bash() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -107,6 +108,7 @@ pub fn it_prepends_the_installation_directory_to_the_path_with_bash() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_does_not_prepend_the_installation_directory_to_the_path_with_bash() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -144,6 +146,7 @@ pub fn it_does_not_prepend_the_installation_directory_to_the_path_with_bash() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_prepends_the_installation_directory_to_the_path_with_zsh() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -180,6 +183,7 @@ pub fn it_prepends_the_installation_directory_to_the_path_with_zsh() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_does_not_prepend_the_installation_directory_to_the_path_with_zsh() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -217,6 +221,7 @@ pub fn it_does_not_prepend_the_installation_directory_to_the_path_with_zsh() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_prepends_the_installation_directory_to_the_path_with_fish() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -257,6 +262,7 @@ pub fn it_prepends_the_installation_directory_to_the_path_with_fish() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 pub fn it_does_not_prepend_the_installation_directory_to_the_path_with_fish() {
     // Create a testing file system
     let home = assert_fs::TempDir::new().unwrap();
@@ -319,8 +325,13 @@ pub fn it_does_not_prepend_the_installation_directory_if_its_already_in_path() {
         .env(
             "PATH",
             format!(
-                "{}:{}",
+                "{}{}{}",
                 home.path().join(".biome").join("bin").display(),
+                if cfg!(target_os = "windows") {
+                    ";"
+                } else {
+                    ":"
+                },
                 std::env::var("PATH").unwrap_or_default()
             ),
         )
@@ -339,4 +350,39 @@ pub fn it_does_not_prepend_the_installation_directory_if_its_already_in_path() {
                 .unwrap()
                 .display()
         )));
+}
+
+#[test]
+#[cfg(not(target_os = "windows"))]
+pub fn it_does_not_prepend_the_installation_directory_if_its_already_being_prepended() {
+    // Create a testing file system
+    let home = assert_fs::TempDir::new().unwrap();
+
+    // Create the command
+    let mut cmd = Command::cargo_bin("biome-installer").unwrap();
+
+    // Configure the command
+    cmd.arg("2.0.5")
+        .env("HOME", home.path())
+        .env("SHELL", "/bin/bash")
+        .assert();
+
+    // Read $HOME/.bashrc
+    let bashrc_path = home.path().join(".bashrc");
+    let bashrc_content = std::fs::read_to_string(&bashrc_path).unwrap_or_default();
+
+    assert!(
+        bashrc_content
+            .matches(&format!(
+                "export PATH=\"{}:$PATH\"",
+                home.path()
+                    .join(".biome")
+                    .join("bin")
+                    .canonicalize()
+                    .unwrap()
+                    .display()
+            ))
+            .count()
+            == 1
+    );
 }
