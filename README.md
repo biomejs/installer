@@ -1,5 +1,4 @@
-> [!WARNING] Work in progress
->
+> [!WARNING]
 > This repository is a work in progress, do not use it yet.
 
 # Biome Installer
@@ -7,8 +6,8 @@
 This repository contains the source code for the cross-platform installer for
 Biome.
 
-> [!TIP] If you are looking to install Biome, run the following command:
->
+> [!TIP] 
+> If you are looking to install Biome, run the following command:
 > ```bash
 > curl -fsSL https://biomejs.org/install.sh | bash
 > ```
@@ -45,7 +44,9 @@ To run the tests, use the following command.
 cargo test -- --test-threads=1
 ```
 
-> [!IMPORTANT] Tests need to be run sequentially.
+> [!IMPORTANT] 
+> 
+> Tests need to be run sequentially.
 >
 > You need to use `--test-threads=1` to force the tests to run sequentially
 > because some tests modifify environment variables in an way that is not
