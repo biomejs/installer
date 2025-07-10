@@ -27,13 +27,13 @@ jobs:
             runner: depot-ubuntu-24.04
             name: "Linux x86_64 (gnu)"
           - target: aarch64-unknown-linux-gnu
-            runner: depot-ubuntu-24.04
+            runner: depot-ubuntu-24.04-arm
             name: "Linux aarch64 (gnu)"
           - target: x86_64-unknown-linux-musl
             runner: depot-ubuntu-24.04
             name: "Linux x86_64 (musl)"
           - target: aarch64-unknown-linux-musl
-            runner: depot-ubuntu-24.04
+            runner: depot-ubuntu-24.04-arm
             name: "Linux aarch64 (musl)"
           - target: x86_64-apple-darwin
             runner: depot-macos-14
@@ -55,11 +55,7 @@ jobs:
           rustup install 1.88.0
           rustup default 1.88.0
           rustup target add ${{ matrix.target }}
-      - name: Install Cargo Binstall
-        uses: cargo-bins/cargo-binstall@main
-      - name: Install Dependencies
-        run: cargo binstall --no-confirm cross
       - name: Build
-        run: cross build --target ${{ matrix.target }} --release
+        run: depot cargo build --target ${{ matrix.target }} --release
       - name: Test
-        run: cross test --target ${{ matrix.target }} -- --test-threads=1
+        run: depot cargo test --target ${{ matrix.target }} -- --test-threads=1
