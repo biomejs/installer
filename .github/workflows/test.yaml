@@ -57,6 +57,11 @@ jobs:
           rustup target add ${{ matrix.target }}
       # - name: Install sccache
       #   run: cargo install sccache
+      - name: Install musl toolchain
+        if: contains(matrix.target, 'musl')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release
       - name: Test
