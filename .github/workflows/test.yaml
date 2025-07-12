@@ -45,7 +45,7 @@ jobs:
             runner: depot-windows-2022
             name: "Windows x86_64"
           - target: aarch64-pc-windows-msvc
-            runner: windows-11-arm
+            runner: depot-windows-2022
             name: "Windows aarch64"
     steps:
       - name: Checkout code
