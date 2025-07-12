@@ -55,6 +55,8 @@ jobs:
           rustup install 1.88.0
           rustup default 1.88.0
           rustup target add ${{ matrix.target }}
+      - name: Install sccache
+        run: cargo install sccache
       - name: Build
         run: depot cargo build --target ${{ matrix.target }} --release
       - name: Test
