@@ -49,8 +49,6 @@ impl Shell {
             Shell::Fish => home_dir.join(".config/fish/config.fish"),
         };
 
-        println!("Config file path: {}", config_file.display());
-
         Ok(config_file)
     }
 }

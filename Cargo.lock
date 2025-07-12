@@ -170,11 +170,13 @@ dependencies = [
  "home",
  "homedir",
  "inquire",
+ "pathman",
  "predicates",
  "reqwest",
  "semver",
  "spinners",
  "tempfile",
+ "thiserror",
  "winreg",
 ]
 
@@ -1080,6 +1082,18 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "windows-targets 0.52.6",
+]
+
+[[package]]
+name = "pathman"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b133ec22ba4349690c4816930eaa79dba061715ab1ce6ad723fa7514d69edcc2"
+dependencies = [
+ "anyhow",
+ "home",
+ "thiserror",
+ "winreg",
 ]
 
 [[package]]

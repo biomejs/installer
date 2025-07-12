@@ -1,10 +1,11 @@
-use std::{fmt::format, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::{ArgAction, Args, ValueHint, arg, value_parser};
 use colored::Colorize;
 use home::home_dir;
 use inquire::{Confirm, Select};
+use pathman::UpdateType;
 use semver::Version;
 use spinners::{Spinner, Spinners};
 
@@ -64,7 +65,7 @@ impl InstallCommand {
     pub fn handle(&self) -> Result<()> {
         let version = match self.should_prompt() {
             true => self.prompt_version()?,
-            false => self.get_latest_version()?,
+            false => self.version.clone().unwrap_or(self.get_latest_version()?),
         };
 
         let temp_file = self
@@ -137,9 +138,9 @@ impl InstallCommand {
             let platform = Platform::detect();
 
             let shell_config: Option<PathBuf> = match platform.shell {
-                Some(shell) => match shell.config_file()? {
-                    Some(path) => Some(path),
-                    None => None,
+                Some(shell) => match shell.config_file() {
+                    Ok(path) => Some(path),
+                    Err(_) => None,
                 },
                 None => None,
             };
@@ -284,25 +285,6 @@ impl InstallCommand {
             return Ok(());
         }
 
-        // If the installation directory is already in the PATH, there's no
-        // reason to go further
-        if installer.is_install_dir_in_path()? {
-            println!(
-                "{}",
-                format!(
-                    "✔ The installation directory {} is already in your PATH",
-                    install_dir.display()
-                )
-                .green()
-            );
-
-            println!(
-                "{}",
-                format!("✔ You can run Biome by typing `biome` in your terminal.").green()
-            );
-            return Ok(());
-        }
-
         // Otherwise, ask the user if possible, or just update the PATH in
         // non-interactive environments
         let should_update_path = match self.should_prompt() {
@@ -325,23 +307,42 @@ impl InstallCommand {
             return Ok(());
         }
 
-        installer
-            .prepend_install_dir_to_path()
-            .context("Failed to update the PATH environment variable")?;
+        match installer.prepend_install_dir_to_path() {
+            Ok(update_type) => match update_type {
+                UpdateType::Success => {
+                    println!(
+                        "{}",
+                        format!(
+                            "✔ The installation directory {} has been added to your PATH",
+                            install_dir.display()
+                        )
+                        .green()
+                    );
 
-        println!(
-            "{}",
-            format!(
-                "✔ The installation directory {} has been added to your PATH",
-                install_dir.display()
-            )
-            .green()
-        );
-
-        println!(
-            "{}",
-            format!("Please restart your terminal to apply the changes.").green()
-        );
+                    println!(
+                        "{}",
+                        format!("You may need to restart your terminal to apply the changes.")
+                            .green()
+                    );
+                }
+                UpdateType::AlreadyInPath => {
+                    println!(
+                        "{}",
+                        format!(
+                            "The installation directory {} is already in your PATH",
+                            install_dir.display()
+                        )
+                        .yellow()
+                    );
+                }
+            },
+            Err(e) => {
+                return Err(anyhow::anyhow!(
+                    "Failed to update the PATH environment variable: {}",
+                    e
+                ));
+            }
+        };
 
         Ok(())
     }
