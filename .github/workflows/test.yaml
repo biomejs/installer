@@ -62,6 +62,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
+      - name: Add CLANG path
+        if: contains(matrix.target, 'aarch64-pc-windows-msvc')
+        run: export LIBCLANG_PATH="C:\\Program Files\\LLVM\\\\bin"
       - name: Build
         run: cargo build --target ${{ matrix.target }} --release
       - name: Test
