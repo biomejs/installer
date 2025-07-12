@@ -55,9 +55,9 @@ jobs:
           rustup install 1.88.0
           rustup default 1.88.0
           rustup target add ${{ matrix.target }}
-      - name: Install sccache
-        run: cargo install sccache
+      # - name: Install sccache
+      #   run: cargo install sccache
       - name: Build
-        run: depot cargo build --target ${{ matrix.target }} --release
+        run: cargo build --target ${{ matrix.target }} --release
       - name: Test
-        run: depot cargo test --target ${{ matrix.target }} -- --test-threads=1
+        run: cargo test --target ${{ matrix.target }} -- --test-threads=1
